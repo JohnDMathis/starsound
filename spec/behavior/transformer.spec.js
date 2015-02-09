@@ -1,13 +1,23 @@
 require( 'should' );
-var transformer = require( '../../src/transformer.js' );
+var Transform = require( '../../src/transformer.js' );
 
 describe( "transformer", function() {
+	describe( "when creating a transformer for a stream", function() {
+		var transformedStream;
+		before( function() {
+			transformedStream = Transform( [ "1", "2" ] ).result();
+		} );
+		it( 'converts each entry to a number (just in case)', function() {
+			transformedStream.should.eql( [ 1, 2 ] );
+		} );
+	} );
+
 	describe( "multiplying a stream by a factor", function() {
 		var stream = [ 1, 2, 3 ];
 		var expectedStream = [ 2, 4, 6 ];
 		var transformedStream;
 		before( function() {
-			transformedStream = transformer.multiply( stream, 2 );
+			transformedStream = Transform( stream ).multiply( 2 ).result();
 		} );
 		it( "multiplies each value in stream by factor", function() {
 			transformedStream.should.eql( expectedStream );
@@ -20,7 +30,7 @@ describe( "transformer", function() {
 		var expectedStream = [ -1, 0, 1, 0, -1, 0, 1 ];
 		var transformedStream;
 		before( function() {
-			transformedStream = transformer.normalize( stream );
+			transformedStream = Transform( stream ).normalize().result();
 		} );
 		it( "adjusts all values equally such that average is 0", function() {
 			transformedStream.should.eql( expectedStream );
@@ -28,6 +38,32 @@ describe( "transformer", function() {
 
 	} );
 
+	describe( "set stream to a minimum base value", function() {
+		var stream = [ -10, 5, 8 ];
+		var expectedStream = [ 0.5, 15.5, 18.5 ];
+		var transformedStream;
+		before( function() {
+			transformedStream = Transform( stream ).setBase( 0.5 ).result();
+		} );
+		it( "adjusts all values such that minimum value is x", function() {
+			transformedStream.should.eql( expectedStream );
+		} );
+
+	} );
+
+	describe( "chaining normalize and setBase", function() {
+		var stream = [ -10, 5, 8 ];
+		var expectedStream = [ 0.5, 15.5, 18.5 ];
+		var transformedStream;
+		before( function() {
+			transformedStream = Transform( stream )
+				.normalize()
+				.setBase( 0.5 ).result();
+		} );
+		it( "adjusts all values such that minimum value is x", function() {
+			transformedStream.should.eql( expectedStream );
+		} );
+	} );
 	describe( "stretching a stream (ascending)", function() {
 		var stream = [ 1.0, 5.0, 10.0, 14.0 ];
 		var factor = 5;
@@ -36,7 +72,7 @@ describe( "transformer", function() {
 		var transformedStream;
 
 		before( function() {
-			transformedStream = transformer.stretch( stream, factor );
+			transformedStream = Transform( stream ).stretch( factor ).result();
 		} );
 		it( 'length is expected length', function() {
 			transformedStream.length.should.equal( expectedStream.length );
@@ -54,7 +90,7 @@ describe( "transformer", function() {
 		-5.5, -4, -3.5, -3, -2.5, -2, -0.25, 1.5, 3.25, 5 ];
 		var transformedStream;
 		before( function() {
-			transformedStream = transformer.stretch( stream, factor );
+			transformedStream = Transform( stream ).stretch( factor ).result();
 		} );
 		it( 'length is expected length', function() {
 			transformedStream.length.should.equal( expectedStream.length );
@@ -73,7 +109,7 @@ describe( "transformer", function() {
 		var transformedStream;
 
 		before( function() {
-			transformedStream = transformer.stretch( stream, factor );
+			transformedStream = Transform( stream ).stretch( factor ).result();
 		} );
 		it( 'length is expected length', function() {
 			transformedStream.length.should.equal( expectedStream.length );

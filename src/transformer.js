@@ -23,7 +23,7 @@ function lerp( a, b, factor ) {
 	return vals;
 }
 
-function stretch( values, factor ) {
+function stretch( factor ) {
 	// make the input array longer, by 'factor'
 	var intValues = [];
 	var leftVal;
@@ -31,9 +31,9 @@ function stretch( values, factor ) {
 	var skippedVal;
 	var lerpVals;
 	var i;
-	for (i = 1; i <= values.length; i++) {
-		leftVal = Number( values[ i - 1 ] );
-		rightVal = Number( values[ i ] );
+	for (i = 1; i <= _processedStream.length; i++) {
+		leftVal = Number( _processedStream[ i - 1 ] );
+		rightVal = Number( _processedStream[ i ] );
 		// console.log( 'i:%s: %s | %s', i, leftVal, rightVal );
 		if ( _.isNaN( rightVal ) ) {
 			intValues.push( leftVal );
@@ -43,27 +43,64 @@ function stretch( values, factor ) {
 			// console.log( 'intValues', intValues );
 		}
 	}
-	return intValues;
+	_processedStream = intValues;
+
+	return publicApi;
 }
 
-function normalize( values ) {
+function normalize( newMin ) {
 	// adjust all values equally, such that average values are set to 0
+	var t = sum( _processedStream );
+	var average = t / _processedStream.length;
 
-	var average = sum( values ) / values.length;
-
-	return _.map( values, function( val ) {
+	// console.log( 'normalize; sum: %s, len: %s, average: %s', t, _processedStream.length, average );
+	_processedStream = _.map( _processedStream, function( val ) {
 		return val - average;
 	} );
+	if ( newMin ) {
+		setBase( newMin );
+	}
+	return publicApi;
 }
 
-function multiply( values, factor ) {
+function setBase( newMin ) {
+	// adjust all values such that the minimum value becomes newMin
+	var min = Math.min.apply( null, _processedStream );
+	var delta = newMin - min;
+
+	_processedStream = _.map( _processedStream, function( val ) {
+		return val + delta;
+	} );
+
+	return publicApi;
+}
+
+function multiply( factor ) {
 	// multiply each value by factor
-	return _.map( values, function( val ) {
+	_processedStream = _.map( _processedStream, function( val ) {
 		return val * factor;
 	} );
+	return publicApi;
 }
-module.exports = {
+
+function result() {
+	return _processedStream;
+}
+var _baseStream;
+var _processedStream;
+var _outputStream;
+
+var publicApi = {
 	stretch: stretch,
 	normalize: normalize,
-	multiply: multiply
+	multiply: multiply,
+	setBase: setBase,
+	result: result
+};
+
+module.exports = function transformer( stream ) {
+	_baseStream = _processedStream = _.map( stream, function( val ) {
+		return Number( val );
+	} );
+	return publicApi;
 };

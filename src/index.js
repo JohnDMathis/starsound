@@ -1,31 +1,76 @@
 var KeyReader = require( './keyReader.js' );
 var importer = require( './importer.js' );
 var _ = require( 'lodash' );
-var transform = require( './transformer.js' );
+var Transform = require( './transformer.js' );
 var player = require( './player.js' );
 var G117 = importer.import( "G117-rel-flux-t1" );
-var comp1 = importer.import( "G117-rel-flux-c1" );
+var comp1 = importer.import( "G117-rel-flux-c2" );
+var comp2 = importer.import( "G117-rel-flux-c3" );
+var gd66 = importer.import( "GD66-rel-flux-T" );
+var comp3 = importer.import( "GD66-rel-flux-c2" );
+
 var playState = false;
 
 player.addDataStream( 'G117', G117 );
 player.addDataStream( 'comp1', comp1 );
+player.addDataStream( 'comp2', comp2 );
+player.addDataStream( 'gd66', gd66 );
+player.addDataStream( 'comp3', comp3 );
 player.addDataStream( 'boring', [ 0.1, 0.2, 0.3, 0.4, 0.5, 0.4, 0.3, 0.2 ] );
 
-// var t1= transform(G117)
-// 			.normalize()
-// 			.stretch(100)
-// 			.multiply(10);
+player.addDataStream( 'G117a',
+	Transform( G117 )
+		.stretch( 4 )
+		.normalize()
+		.multiply( 30 )
+		.setBase( 0.10001 )
+		.result() );
 
-player.addDataStream( 'G117-transform1', )
+player.addDataStream( 'comp1a', Transform( comp1 )
+	.stretch( 4 )
+	.normalize()
+	.multiply( 30 )
+	.setBase( 0.0001 )
+	.result()
+);
+player.addDataStream( 'comp2a', Transform( comp2 )
+	.stretch( 4 )
+	.normalize()
+	.multiply( 30 )
+	.setBase( 0.0001 )
+	.result()
+);
+player.addDataStream( 'gd66a', Transform( gd66 )
+	.stretch( 6 )
+	.normalize()
+	.multiply( 30 )
+	// .setBase( 0.0001 )
+	.result()
+);
+player.addDataStream( 'comp3a', Transform( comp3 )
+	.stretch( 6 )
+	.normalize()
+	.multiply( 30 )
+	// .setBase( 0.0001 )
+	.result()
+);
+
 playSource( 1 );
 
 function playSource( source ) {
-	console.log( 'change to source', source );
 	var sourceMap = {
 		1: 'G117',
 		2: 'comp1',
-		3: 'boring'
+		3: 'boring',
+		4: 'G117a',
+		5: 'comp1a',
+		6: 'comp2a',
+		7: 'gd66',
+		8: 'gd66a',
+		9: 'comp3a'
 	};
+	console.log( 'change to source #%s (%s)', source, sourceMap[ source ] );
+
 	player.play( sourceMap[ source ] );
 	playState = true;
 }
@@ -87,11 +132,20 @@ function demagnify() {
 	console.log( 'demagnify' );
 	player.demagnify();
 }
+function dump() {
+	console.log( player.currentStream() );
+}
 
 var keyActionMap = {
 	1: playSource,
 	2: playSource,
 	3: playSource,
+	4: playSource,
+	5: playSource,
+	6: playSource,
+	7: playSource,
+	8: playSource,
+	9: playSource,
 	p: togglePlayState,
 	'up': tuneUp,
 	'down': tuneDown,
@@ -99,7 +153,8 @@ var keyActionMap = {
 	b: setBaseTone,
 	'+': magnify,
 	'=': magnify,
-	'-': demagnify
+	'-': demagnify,
+	' ': dump
 };
 
 KeyReader( keyActionMap );
