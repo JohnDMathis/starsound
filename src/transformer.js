@@ -83,6 +83,17 @@ function multiply( factor ) {
 	return publicApi;
 }
 
+function truncateAt( lengthOrPercent ) {
+	if ( lengthOrPercent < 0 ) {
+		return publicApi;
+	}
+	var len = ( lengthOrPercent > 1 ) ? lengthOrPercent : _processedStream.length * lengthOrPercent;
+
+	_processedStream = _processedStream.slice( 0, len );
+	console.log( len, _processedStream );
+	return publicApi;
+}
+
 function result() {
 	return _processedStream;
 }
@@ -95,6 +106,7 @@ var publicApi = {
 	normalize: normalize,
 	multiply: multiply,
 	setBase: setBase,
+	truncateAt: truncateAt,
 	result: result
 };
 

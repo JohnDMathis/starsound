@@ -21,8 +21,9 @@ player.addDataStream( 'comp2b', comp2b );
 player.addDataStream( 'comp3', comp3 );
 player.addDataStream( 'boring', [ 0.1, 0.2, 0.3, 0.4, 0.5, 0.4, 0.3, 0.2 ] );
 
-player.addTransformer( '1', function( stream ) {
+player.addTransformer( 'a', function( stream ) {
 	return Transform( stream )
+		.truncateAt( 0.95 )
 		.stretch( 4 )
 		.normalize()
 		.multiply( 30 )
@@ -30,12 +31,29 @@ player.addTransformer( '1', function( stream ) {
 		.result();
 } );
 
-player.addTransformer( '2', function( stream ) {
+player.addTransformer( 'b', function( stream ) {
 	return Transform( stream )
+		.truncateAt( 0.95 )
 		.stretch( 6 )
 		.normalize()
 		.multiply( 30 )
 		// .setBase( 0.0001 )
+		.result();
+} );
+
+var customTransformValues = {
+	stretch: 1,
+	multiply: 1,
+	truncateAt: -1,
+	normalize: 0
+};
+
+player.addTransformer( 'custom', function( stream ) {
+	return Transform( stream )
+		.truncateAt( customTransformValues.truncateAt )
+		.normalize( customTransformValues.normalize )
+		.multiply( customTransformValues.multiply )
+		.stretch( customTransformValues.stretch )
 		.result();
 } );
 
@@ -45,8 +63,9 @@ function playSource( source ) {
 	var sourceMap = {
 		1: 'G117',
 		2: 'gd66',
-		3: 'comp2',
-		4: 'comp2b'
+		3: 'comp1',
+		4: 'comp2',
+		5: 'comp2b'
 	};
 	console.log( 'change to source #%s (%s)', source, sourceMap[ source ] );
 
@@ -55,7 +74,11 @@ function playSource( source ) {
 }
 
 function transform( id ) {
-	player.useTransformer( id - 4 );
+	player.useTransformer( id );
+}
+
+function clearTransform() {
+	player.clearTransformer();
 }
 
 function changePlayState( newState ) {
@@ -83,11 +106,15 @@ function play() {
 }
 
 function expand() {
-	console.log( 'expand' );
+	customTransformValues.stretch += 1;
+	console.log( 'expand', customTransformValues.stretch );
+	player.useTransformer( 'custom' );
 }
 
 function contract() {
-	console.log( 'contract' );
+	customTransformValues.stretch -= 1;
+	console.log( 'contract', customTransformValues.stretch );
+	player.useTransformer( 'custom' );
 }
 
 function tuneUp() {
@@ -124,19 +151,25 @@ var keyActionMap = {
 	2: playSource,
 	3: playSource,
 	4: playSource,
-	5: transform,
-	6: transform,
-	7: transform,
-	8: transform,
-	9: transform,
+	5: playSource,
+	6: playSource,
+	7: playSource,
+	8: playSource,
+	9: playSource,
+	a: transform,
+	b: transform,
+	c: transform,
+	d: transform,
 	p: togglePlayState,
-	'up': tuneUp,
-	'down': tuneDown,
+	'backspace': clearTransform,
+	'=': tuneUp,
+	'-': tuneDown,
 	m: changeMode,
-	b: setBaseTone,
-	'+': magnify,
-	'=': magnify,
-	'-': demagnify,
+	x: setBaseTone,
+	'up': magnify,
+	'down': demagnify,
+	'left': contract,
+	'right': expand,
 	' ': dump
 };
 

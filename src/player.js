@@ -48,14 +48,15 @@ function useTransformer( id ) {
 		currentTransformer = transformers[ id ];
 		console.log( 'assigning transformer', currentTransformer );
 		if ( publicApi.isPlaying ) {
-			// refresh with new transformer
-			// play();
 			currentStream( streamName );
 		}
 	}
 }
 function clearTransformer() {
 	currentTransformer = null;
+	if ( publicApi.isPlaying ) {
+		currentStream( streamName );
+	}
 }
 function mode( newMode ) {
 	if ( newMode === undefined ) {
@@ -137,6 +138,7 @@ var publicApi = {
 	addTransformer: addTransformer,
 	getTransformer: getTransformer,
 	useTransformer: useTransformer,
+	clearTransformer: clearTransformer,
 	mode: mode.bind( state ),
 	playState: playState.bind( state ),
 	stretch: stretch.bind( state ),
