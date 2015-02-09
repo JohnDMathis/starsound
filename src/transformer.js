@@ -49,6 +49,9 @@ function stretch( factor ) {
 }
 
 function normalize( newMin ) {
+	if ( _.isNull( newMin ) || _.isUndefined( newMin ) ) {
+		return publicApi;
+	}
 	// adjust all values equally, such that average values are set to 0
 	var t = sum( _processedStream );
 	var average = t / _processedStream.length;
@@ -57,7 +60,7 @@ function normalize( newMin ) {
 	_processedStream = _.map( _processedStream, function( val ) {
 		return val - average;
 	} );
-	if ( newMin ) {
+	if ( newMin !== 0 ) {
 		setBase( newMin );
 	}
 	return publicApi;
@@ -90,7 +93,7 @@ function truncateAt( lengthOrPercent ) {
 	var len = ( lengthOrPercent > 1 ) ? lengthOrPercent : _processedStream.length * lengthOrPercent;
 
 	_processedStream = _processedStream.slice( 0, len );
-	console.log( len, _processedStream );
+	console.log( lengthOrPercent, len, _processedStream.length );
 	return publicApi;
 }
 

@@ -18,6 +18,7 @@ var pos = 0;
 
 var transformers = {};
 var currentTransformer;
+var currentTransformerName;
 
 function addTransformer( id, fn ) {
 	transformers[ id ] = fn;
@@ -37,16 +38,22 @@ function getStream( id ) {
 	return _streams[ id ];
 }
 
+function getStreamName() {
+	return streamName ? streamName : "none";
+}
+
 function getTransformer( id ) {
 	return transformers[ id ];
 }
 
+function getTransformerName() {
+	return currentTransformerName;
+}
 function useTransformer( id ) {
 	id = id.toString();
-	console.log( 'useTransformer', id, transformers );
 	if ( id && transformers[ id ] ) {
 		currentTransformer = transformers[ id ];
-		console.log( 'assigning transformer', currentTransformer );
+		currentTransformerName = id;
 		if ( publicApi.isPlaying ) {
 			currentStream( streamName );
 		}
@@ -75,16 +82,10 @@ function stretch() {
 function currentStream( streamId ) {
 	if ( streamId && _streams[ streamId ] ) {
 		if ( currentTransformer ) {
-			console.log( 'use transformer' );
 			stream = currentTransformer( _streams[ streamId ] );
 		} else {
-			console.log( 'just stream' );
 			stream = _streams[ streamId ];
 		}
-		// stream = currentTransformer ?
-		// 	currentTransformer( _streams[ streamId ] )
-		// 	: _streams[ streamId ];
-		console.log( 'stream changed from [ %s ] to [ %s ]', streamName, streamId, stream.length );
 		streamName = streamId;
 	}
 	return stream;
@@ -135,8 +136,10 @@ function stop() {
 var publicApi = {
 	addDataStream: addDataStream.bind( state ),
 	getStream: getStream.bind( state ),
+	getStreamName: getStreamName,
 	addTransformer: addTransformer,
 	getTransformer: getTransformer,
+	getTransformerName: getTransformerName,
 	useTransformer: useTransformer,
 	clearTransformer: clearTransformer,
 	mode: mode.bind( state ),
