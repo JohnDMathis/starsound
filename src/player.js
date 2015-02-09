@@ -11,11 +11,17 @@ var _modes = {
 	simple: modeSimple
 };
 var _streams = {};
-var _currentStream;
+var stream;
+var streamName;
 var _currentModeFn = _modes.simple;
 var pos = 0;
 
+var transformers = {};
+var currentTransformer;
 
+function addTransformer( id, fn ) {
+	transformers[ id ] = fn;
+}
 
 function addDataStream( id, stream ) {
 	if ( !_streams ) {
@@ -31,6 +37,26 @@ function getStream( id ) {
 	return _streams[ id ];
 }
 
+function getTransformer( id ) {
+	return transformers[ id ];
+}
+
+function useTransformer( id ) {
+	id = id.toString();
+	console.log( 'useTransformer', id, transformers );
+	if ( id && transformers[ id ] ) {
+		currentTransformer = transformers[ id ];
+		console.log( 'assigning transformer', currentTransformer );
+		if ( publicApi.isPlaying ) {
+			// refresh with new transformer
+			// play();
+			currentStream( streamName );
+		}
+	}
+}
+function clearTransformer() {
+	currentTransformer = null;
+}
 function mode( newMode ) {
 	if ( newMode === undefined ) {
 		return _mode;
@@ -47,13 +73,24 @@ function stretch() {
 
 function currentStream( streamId ) {
 	if ( streamId && _streams[ streamId ] ) {
-		_currentStream = _streams[ streamId ];
+		if ( currentTransformer ) {
+			console.log( 'use transformer' );
+			stream = currentTransformer( _streams[ streamId ] );
+		} else {
+			console.log( 'just stream' );
+			stream = _streams[ streamId ];
+		}
+		// stream = currentTransformer ?
+		// 	currentTransformer( _streams[ streamId ] )
+		// 	: _streams[ streamId ];
+		console.log( 'stream changed from [ %s ] to [ %s ]', streamName, streamId, stream.length );
+		streamName = streamId;
 	}
-	return _currentStream;
+	return stream;
 }
 
 function processor( t ) {
-	if ( pos >= _currentStream.length ) {
+	if ( pos >= stream.length ) {
 		pos = -1;
 	}
 	pos += 1;
@@ -63,7 +100,7 @@ function processor( t ) {
 var b = baudio( processor );
 
 function modeSimple( t ) {
-	return _currentStream[ pos ];
+	return stream[ pos ];
 }
 
 function play( streamId ) {
@@ -72,7 +109,7 @@ function play( streamId ) {
 			return;
 		}
 		currentStream( streamId );
-	} else if ( !_currentStream ) {
+	} else if ( !stream ) {
 		var keys = _.keys( _streams );
 		if ( keys.length === 0 ) {
 			return;
@@ -97,6 +134,9 @@ function stop() {
 var publicApi = {
 	addDataStream: addDataStream.bind( state ),
 	getStream: getStream.bind( state ),
+	addTransformer: addTransformer,
+	getTransformer: getTransformer,
+	useTransformer: useTransformer,
 	mode: mode.bind( state ),
 	playState: playState.bind( state ),
 	stretch: stretch.bind( state ),

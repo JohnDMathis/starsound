@@ -1,4 +1,5 @@
 require( 'should' );
+var Transform = require( '../../src/transformer.js' );
 var pequire = require( 'proxyquire' );
 
 var bFn;
@@ -17,7 +18,7 @@ var baudioMock = function( fn ) {
 	};
 };
 
-describe( "player", function() {
+describe.only( "player", function() {
 	var player;
 	var s;
 	var stream1 = [ 1 ];
@@ -138,6 +139,25 @@ describe( "player", function() {
 		} );
 	} );
 
+	describe( "adding a transformer", function() {
+		var t1 = function( stream ) {
+			return Transform( stream ).result();
+		};
 
+		before( function() {
+			player.addTransformer( 't1', t1 );
+			transformedStream = player.getTransformer( 't1' );
+		} );
+		it( 'stores the transformer', function() {
+			player.getTransformer( 't1' ).should.eql( t1 );
+		} );
+	} );
 
+	describe( "use a transformer", function() {
+		var t1 = function( stream ) {
+			return Transform( stream ).result();
+		};
+		before( function() {} );
+		it( 'uses the specified transformer when playing', function() {} );
+	} );
 } );
