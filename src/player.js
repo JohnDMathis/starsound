@@ -1,8 +1,13 @@
 var _ = require( 'lodash' );
 var baudio = require( 'baudio' );
+// var postal = require( 'postal' );
+// var notifier = postal.channel( "updates" );
+
 var speedFactor = 1; // 1=.5, 2=.3333, 3=.25, 4=, 5=.125
 var freq = 200;
 var TAU = 2 * Math.PI;
+
+var socket;
 
 var state = {};
 var _stretch = 0;
@@ -19,6 +24,10 @@ var pos = 0;
 var transformers = {};
 var currentTransformer;
 var currentTransformerName;
+
+function startNofication( _socket ) {
+	socket = _socket;
+}
 
 function addTransformer( id, fn ) {
 	transformers[ id ] = fn;
@@ -87,6 +96,15 @@ function currentStream( streamId ) {
 			stream = _streams[ streamId ];
 		}
 		streamName = streamId;
+		if ( socket ) {
+			console.log( 'notifying' );
+			socket.notify( "hey.there", { data: 'BOOMER' } );
+			socket.notify( "stream.changed", {
+				id: streamId,
+				stream: stream,
+				transformer: currentTransformerName
+			} );
+		}
 	}
 	return stream;
 }
@@ -134,6 +152,7 @@ function stop() {
 }
 
 var publicApi = {
+	startNofication: startNofication,
 	addDataStream: addDataStream.bind( state ),
 	getStream: getStream.bind( state ),
 	getStreamName: getStreamName,

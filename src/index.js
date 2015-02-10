@@ -1,8 +1,31 @@
+var host = require( 'autohost' );
 var KeyReader = require( './keyReader.js' );
 var importer = require( './importer.js' );
 var _ = require( 'lodash' );
 var Transform = require( './transformer.js' );
 var player = require( './player.js' );
+// var postal = require( 'postal' );
+// var notifier = postal.channel( 'updates' );
+
+host.init( {
+	socketIO: true,
+	websocket: false
+} );
+
+host.on( "socket.client.closed", function( data ) {
+	console.log( "got socket.client.closed for id", data.id );
+} );
+
+host.on( "socket.client.identified", function( data ) {
+	console.log( "client identified", data.id );
+	host.socket.notify( "hey.there", { data: 'BOOM' } );
+	player.startNofication( host.socket );
+} );
+
+// notifier.subscribe( "stream.changed", function( data ) {
+// 	console.log( 'stream.changed', data );
+// } );
+
 
 var G117 = importer.import( "G117-rel-flux-t1" );
 var comp1 = importer.import( "G117-rel-flux-c2" );
@@ -20,6 +43,7 @@ player.addDataStream( 'comp2', comp2 );
 player.addDataStream( 'comp2b', comp2b );
 player.addDataStream( 'comp3', comp3 );
 player.addDataStream( 'boring', [ 0.1, 0.2, 0.3, 0.4, 0.5, 0.4, 0.3, 0.2 ] );
+player.addDataStream( 'boringer', [ 0.1, 0.1, 0.15, 0.09, 0.1, 0.11, 0.09, 0.1 ] );
 
 player.addTransformer( 'a', function( stream ) {
 	return Transform( stream )
@@ -27,7 +51,6 @@ player.addTransformer( 'a', function( stream ) {
 		.stretch( 4 )
 		.normalize( 0 )
 		.multiply( 10 )
-		// .setBase( 0.10001 )
 		.result();
 } );
 
@@ -37,20 +60,25 @@ player.addTransformer( 'b', function( stream ) {
 		.stretch( 6 )
 		.normalize( 0 )
 		.multiply( 10 )
-		// .setBase( 0.0001 )
 		.result();
 } );
 
 
-playSource( 1 );
+// playSource( 1 );
 
 function playSource( source ) {
+	// host.socket.send( "hey.there", {
+	// 	data: {}
+	// } );
+
 	var sourceMap = {
 		1: 'comp1',
 		2: 'comp2',
 		3: 'comp3',
 		4: 'G117',
-		5: 'GD66'
+		5: 'GD66',
+		6: "boring",
+		7: "boringer"
 	};
 	console.log( 'change to source #%s (%s)', source, sourceMap[ source ] );
 
