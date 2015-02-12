@@ -32,7 +32,7 @@ var comp1 = importer.import( "G117-rel-flux-c2" );
 var comp2 = importer.import( "G117-rel-flux-c3" );
 var comp2b = importer.import( "G117-rel-flux-c3-b" );
 var gd66 = importer.import( "GD66-rel-flux-T" );
-var comp3 = importer.import( "GD66-rel-flux-c2" );
+var comp3 = importer.import( "GD66-rel-flux-C2" );
 
 var playState = false;
 
