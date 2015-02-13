@@ -8,6 +8,7 @@ var player = require( './player.js' );
 // var notifier = postal.channel( 'updates' );
 
 host.init( {
+	port: 8810,
 	socketIO: true,
 	websocket: false
 } );

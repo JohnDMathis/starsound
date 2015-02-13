@@ -18,7 +18,7 @@ var baudioMock = function( fn ) {
 	};
 };
 
-describe.only( "player", function() {
+describe( "player", function() {
 	var player;
 	var s;
 	var stream1 = [ 1 ];

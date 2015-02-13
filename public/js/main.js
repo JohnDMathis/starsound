@@ -1,21 +1,46 @@
 require.config( {
-	// The shim config allows us to configure dependencies for
-	// scripts that do not call define() to register a module
+	baseUrl: "../lib",
 	shim: {
 		'socketio': {
 			exports: 'io'
 		}
 	},
 	paths: {
-		socketio: "../lib/socket.io",
-		lodash: "../lib/lodash.min"
+		socketio: "socket.io",
+		lodash: "lodash.min",
+		jquery: "jquery"
 	}
 
 } );
 
+define( [ '../lib/chart.min.js', 'lodash', 'socketio', 'jquery' ], function( Chart, _, io, $ ) {
 
-define( [ '../lib/chart.min.js', 'lodash', 'socketio' ], function( Chart, _, io ) {
 	var ctx = document.getElementById( "chart1" ).getContext( "2d" );
+
+	function configureSocket( host ) {
+		console.log( 'configureSocket', host );
+		var socket = io.connect( "http://" + host.ipAddress + ":8810" );
+		socket.on( 'connect', function() {
+			console.log( 'connected!' );
+		} );
+		socket.on( 'stream.changed', function( msg ) {
+			console.log( 'stream changed', msg.id );
+			var labels = _.map( msg.stream, function( s, i ) {
+				return ( i + 1 ).toString();
+			} );
+			console.log( 'labels:', labels.length, 'data:', msg.stream.length );
+
+			data.labels = labels;
+			data.datasets[ 0 ].data = msg.stream;
+			chart.destroy();
+			chart = new Chart( ctx ).Line( data, { pointDot: false, scaleShowVerticalLines: false, scaleShowHorizontalLines: false, dataSetFill: false } );
+		} );
+		socket.on( 'hey.there', function( msg ) {
+			console.log( 'hey there', msg );
+		} );
+	}
+
+	$.get( '/api/app/host', configureSocket );
 
 	var data = {
 		labels: [],
@@ -40,24 +65,5 @@ define( [ '../lib/chart.min.js', 'lodash', 'socketio' ], function( Chart, _, io 
 	var chart;
 	chart = new Chart( ctx ).Line( data, { pointDot: false, scaleShowVerticalLines: false, scaleShowHorizontalLines: false, dataSetFill: false } );
 
-	var socket = io.connect( "http://localhost:8800" );
-	socket.on( 'connect', function() {
-		console.log( 'connected!' );
-	} );
-	socket.on( 'stream.changed', function( msg ) {
-		console.log( 'stream changed', msg.id );
-		var labels = _.map( msg.stream, function( s, i ) {
-			return ( i + 1 ).toString();
-		} );
-		console.log( 'labels:', labels.length, 'data:', msg.stream.length );
-
-		data.labels = labels;
-		data.datasets[ 0 ].data = msg.stream;
-		chart.destroy();
-		chart = new Chart( ctx ).Line( data, { pointDot: false, scaleShowVerticalLines: false, scaleShowHorizontalLines: false, dataSetFill: false } );
-	} );
-	socket.on( 'hey.there', function( msg ) {
-		console.log( 'hey there', msg );
-	} );
 
 } );
