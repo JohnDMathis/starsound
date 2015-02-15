@@ -8,12 +8,13 @@ require.config( {
 	paths: {
 		socketio: "socket.io",
 		lodash: "lodash.min",
-		jquery: "jquery"
+		jquery: "jquery",
+		chart: 'chart'
 	}
 
 } );
 
-define( [ '../lib/chart.js', 'lodash', 'socketio', 'jquery' ], function( Chart, _, io, $ ) {
+define( [ 'chart', 'lodash', 'socketio', 'jquery' ], function( Chart, _, io, $ ) {
 
 	var ctx = document.getElementById( "chart1" ).getContext( "2d" );
 
