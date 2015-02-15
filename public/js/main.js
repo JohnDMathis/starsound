@@ -13,7 +13,7 @@ require.config( {
 
 } );
 
-define( [ '../lib/chart.min.js', 'lodash', 'socketio', 'jquery' ], function( Chart, _, io, $ ) {
+define( [ '../lib/chart.js', 'lodash', 'socketio', 'jquery' ], function( Chart, _, io, $ ) {
 
 	var ctx = document.getElementById( "chart1" ).getContext( "2d" );
 
