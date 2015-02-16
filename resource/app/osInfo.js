@@ -4,7 +4,7 @@ var _ = require( "lodash" );
 function getIpAddress() {
 	var ifaces = os.networkInterfaces();
 
-	var preferredNics = [ "en0", "vnic0", "vnic1" ];
+	var preferredNics = [ "en0", "eth0", "vnic0", "vnic1" ];
 	var foundNic;
 
 	for (var i = 0; i < preferredNics.length; i++) {
