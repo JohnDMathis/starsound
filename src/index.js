@@ -1,11 +1,12 @@
 var host = require( 'autohost' );
-var KeyReader = require( './keyReader.js' );
+// var KeyReader = require( './keyReader.js' );
 var importer = require( './importer.js' );
 var _ = require( 'lodash' );
 var Transform = require( './transformer.js' );
 var player = require( './player.js' );
-// var postal = require( 'postal' );
-// var notifier = postal.channel( 'updates' );
+var postal = require( 'postal' );
+require( "./duino.js" );
+var commands = postal.channel( 'commands' );
 
 host.init( {
 	port: 8810,
@@ -23,28 +24,38 @@ host.on( "socket.client.identified", function( data ) {
 	player.startNofication( host.socket );
 } );
 
-// notifier.subscribe( "stream.changed", function( data ) {
-// 	console.log( 'stream.changed', data );
-// } );
+commands.subscribe( "action", function( actionNum ) {
+	console.log( "got action", actionNum );
+	playSource( actionNum );
+} );
 
+commands.subscribe( "analog.changed.*", function( percentage ) {
+	var stretchVals = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ];
+	var i = Math.round( percentage / stretchVals.length - 1 );
+	// console.log( 'new percentage: %s %; i: %s', percentage, i );
+	setStretch( stretchVals[ i ] );
+} );
 
 var G117 = importer.import( "G117-rel-flux-t1" );
 var comp1 = importer.import( "G117-rel-flux-c2" );
 var comp2 = importer.import( "G117-rel-flux-c3" );
 var comp2b = importer.import( "G117-rel-flux-c3-b" );
 var gd66 = importer.import( "GD66-rel-flux-T" );
+var gd662 = importer.import( "GD66-0206" );
 var comp3 = importer.import( "GD66-rel-flux-C2" );
 
 var playState = false;
 
 player.addDataStream( 'G117', G117 );
 player.addDataStream( 'GD66', gd66 );
+player.addDataStream( 'GD662', gd662 );
 player.addDataStream( 'comp1', comp1 );
 player.addDataStream( 'comp2', comp2 );
 player.addDataStream( 'comp2b', comp2b );
 player.addDataStream( 'comp3', comp3 );
 player.addDataStream( 'boring', [ 0.1, 0.2, 0.3, 0.4, 0.5, 0.4, 0.3, 0.2 ] );
 player.addDataStream( 'boringer', [ 0.1, 0.1, 0.15, 0.09, 0.1, 0.11, 0.09, 0.1 ] );
+
 
 player.addTransformer( 'a', function( stream ) {
 	return Transform( stream )
@@ -79,12 +90,16 @@ function playSource( source ) {
 		4: 'G117',
 		5: 'GD66',
 		6: "boring",
-		7: "boringer"
+		7: "boringer",
+		8: "GD662"
 	};
-	console.log( 'change to source #%s (%s)', source, sourceMap[ source ] );
-
-	player.play( sourceMap[ source ] );
-	playState = true;
+	// console.log( 'change to source #%s (%s)', source, sourceMap[ source ] );
+	if ( sourceMap[ source ] ) {
+		player.play( sourceMap[ source ] );
+		playState = true;
+	} else {
+		console.log( 'not found', source );
+	}
 }
 
 function transform( id ) {
@@ -130,6 +145,10 @@ function contract() {
 	player.useTransformer( 'custom' );
 }
 
+function setStretch( newStretch ) {
+	customTransformValues.stretch = newStretch;
+	player.useTransformer( 'custom' );
+}
 
 function magnify() {
 	customTransformValues.multiply += 0.25;
@@ -207,4 +226,4 @@ var keyActionMap = {
 	' ': dump
 };
 
-KeyReader( keyActionMap );
+// KeyReader( keyActionMap );
