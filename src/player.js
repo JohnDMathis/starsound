@@ -1,8 +1,6 @@
 var _ = require( 'lodash' );
-var baudio = require( 'baudio' );
-// var postal = require( 'postal' );
-// var notifier = postal.channel( "updates" );
-
+var Baudio = require( 'baudio' );
+var baudio;
 var speedFactor = 1; // 1=.5, 2=.3333, 3=.25, 4=, 5=.125
 var freq = 200;
 var TAU = 2 * Math.PI;
@@ -20,7 +18,6 @@ var stream;
 var streamName;
 var _currentModeFn = _modes.simple;
 var pos = 0;
-
 var transformers = {};
 var currentTransformer;
 var currentTransformerName;
@@ -80,10 +77,6 @@ function mode( newMode ) {
 	}
 }
 
-function playState() {
-	return _playState;
-}
-
 function stretch() {
 	return _stretch;
 }
@@ -117,13 +110,16 @@ function processor( t ) {
 	return _currentModeFn( t );
 }
 
-var b = baudio( processor );
 
 function modeSimple( t ) {
 	return stream[ pos ];
 }
 
 function play( streamId ) {
+	if ( !baudio ) {
+		baudio = new Baudio( processor );
+
+	}
 	if ( streamId ) {
 		if ( !_streams[ streamId ] ) {
 			return;
@@ -139,15 +135,17 @@ function play( streamId ) {
 	}
 
 	if ( !publicApi.isPlaying ) {
-		b.play();
+		baudio.play();
 		publicApi.isPlaying = true;
 	}
 }
 
 function stop() {
 	if ( publicApi.isPlaying ) {
-		b.end();
+		baudio.end();
+		baudio = null;
 		publicApi.isPlaying = false;
+
 	}
 }
 
@@ -162,7 +160,6 @@ var publicApi = {
 	useTransformer: useTransformer,
 	clearTransformer: clearTransformer,
 	mode: mode.bind( state ),
-	playState: playState.bind( state ),
 	stretch: stretch.bind( state ),
 	play: play.bind( state ),
 	stop: stop.bind( state ),

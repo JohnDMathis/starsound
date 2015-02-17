@@ -1,11 +1,11 @@
 var host = require( 'autohost' );
-// var KeyReader = require( './keyReader.js' );
+var KeyReader = require( './keyReader.js' );
 var importer = require( './importer.js' );
 var _ = require( 'lodash' );
 var Transform = require( './transformer.js' );
 var player = require( './player.js' );
 var postal = require( 'postal' );
-require( "./duino.js" );
+// require( "./duino.js" );
 var commands = postal.channel( 'commands' );
 
 host.init( {
@@ -44,8 +44,6 @@ var gd66 = importer.import( "GD66-rel-flux-T" );
 var gd662 = importer.import( "GD66-0206" );
 var comp3 = importer.import( "GD66-rel-flux-C2" );
 
-var playState = false;
-
 player.addDataStream( 'G117', G117 );
 player.addDataStream( 'GD66', gd66 );
 player.addDataStream( 'GD662', gd662 );
@@ -75,13 +73,8 @@ player.addTransformer( 'b', function( stream ) {
 		.result();
 } );
 
-
-// playSource( 1 );
-
 function playSource( source ) {
-	// host.socket.send( "hey.there", {
-	// 	data: {}
-	// } );
+
 
 	var sourceMap = {
 		1: 'comp1',
@@ -93,10 +86,19 @@ function playSource( source ) {
 		7: "boringer",
 		8: "GD662"
 	};
-	// console.log( 'change to source #%s (%s)', source, sourceMap[ source ] );
-	if ( sourceMap[ source ] ) {
-		player.play( sourceMap[ source ] );
-		playState = true;
+	var sourceName = sourceMap[ source ];
+	if ( sourceName ) {
+
+		// console.log( 'playSource; [%s] selected; [%s] is currently [%s]',
+		// 	sourceName,
+		// 	player.getStreamName(),
+		// 	player.isPlaying ? "playing" : "stopped" );
+
+		if ( player.getStreamName() === sourceName && player.isPlaying ) {
+			player.stop();
+		} else {
+			player.play( sourceName );
+		}
 	} else {
 		console.log( 'not found', source );
 	}
@@ -108,30 +110,6 @@ function transform( id ) {
 
 function clearTransform() {
 	player.clearTransformer();
-}
-
-function changePlayState( newState ) {
-	if ( newState === undefined ) {
-		newState = !playState;
-	}
-	playState = newState;
-	console.log( playState ? "playing" : "paused" );
-	if ( playState ) {
-		player.play();
-	} else {
-		player.stop();
-	}
-}
-
-function togglePlayState() {
-	changePlayState();
-}
-function pause() {
-	changePlayState( false );
-}
-
-function play() {
-	changePlayState( true );
 }
 
 function expand() {
@@ -216,7 +194,6 @@ var keyActionMap = {
 	b: transform,
 	c: transform,
 	d: transform,
-	p: togglePlayState,
 	t: truncate,
 	'backspace': clearTransform,
 	'up': magnify,
@@ -226,4 +203,4 @@ var keyActionMap = {
 	' ': dump
 };
 
-// KeyReader( keyActionMap );
+KeyReader( keyActionMap );
