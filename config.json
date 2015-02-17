@@ -1,0 +1,14 @@
+{
+	"dataStreamMap":{
+		"1":"GD66",
+		"2":"GD66_2",
+		"3":"G117",
+		"4":"GD66_c2",
+		"5":"GD66_2_c2",
+		"6":"GD66_2_c3",
+		"7":"G117_c2",
+		"8":"G117_c3"
+	},
+	"useArduino":false,
+	"useConsole":true
+}

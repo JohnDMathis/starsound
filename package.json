@@ -6,6 +6,7 @@
   "dependencies": {
     "autohost": "^0.3.0-19",
     "baudio": "^2.1.2",
+    "configya": "^0.2.0",
     "digitalsignals": "^1.0.0",
     "j5-songs": "^0.0.5",
     "johnny-five": "^0.8.20",
