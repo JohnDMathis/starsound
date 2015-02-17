@@ -83,15 +83,28 @@ function stretch() {
 
 function currentStream( streamId ) {
 	if ( streamId && _streams[ streamId ] ) {
-		if ( currentTransformer ) {
-			stream = currentTransformer( _streams[ streamId ] );
+		// check for a transformer matching streamId
+		// if present, apply it
+		console.log( "setting stream to", streamId, transformers[ streamId ] );
+		var strm;
+		if ( transformers[ streamId ] ) {
+			console.log( "applying transformer", streamId );
+			var t = getTransformer( streamId );
+			console.log( t );
+			strm = t( _streams[ streamId ] );
 		} else {
-			stream = _streams[ streamId ];
+			strm = _streams[ streamId ];
+		}
+
+		if ( currentTransformer ) {
+			console.log( 'applying currentTransformer' );
+			stream = currentTransformer( strm );
+		} else {
+			stream = strm;
 		}
 		streamName = streamId;
 		if ( socket ) {
 			console.log( 'notifying' );
-			socket.notify( "hey.there", { data: 'BOOMER' } );
 			socket.notify( "stream.changed", {
 				id: streamId,
 				stream: stream,

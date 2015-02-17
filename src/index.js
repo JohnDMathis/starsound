@@ -54,23 +54,13 @@ _.each( config.dataStreamMap, function( item ) {
 	player.addDataStream( item, stream );
 } );
 
-
-player.addTransformer( 'a', function( stream ) {
-	return Transform( stream )
-		.truncateAt( 0.925 )
-		.stretch( 4 )
-		.normalize( 0 )
-		.multiply( 10 )
-		.result();
-} );
-
-player.addTransformer( 'b', function( stream ) {
-	return Transform( stream )
-		.truncateAt( 0.925 )
-		.stretch( 6 )
-		.normalize( 0 )
-		.multiply( 10 )
-		.result();
+_.each( config.levelAdjustments, function( level, key ) {
+	console.log( 'add level adjustment for [%s] to [%s]:', key, level );
+	player.addTransformer( key, function( stream ) {
+		return Transform( stream )
+			.multiply( level )
+			.result();
+	} );
 } );
 
 function playSource( source ) {
