@@ -3,10 +3,10 @@ var postal = require( 'postal' );
 var commands = postal.channel( 'commands' );
 
 var board = new j5.Board();
-var btn1pin = 4;
-var btn2pin = 5;
-var btn3pin = 6;
-var btn4pin = 7;
+var btn1pin = 2;
+var btn2pin = 3;
+var btn3pin = 4;
+var btn4pin = 5;
 var btn5pin = 8;
 var btn6pin = 9;
 var btn7pin = 10;
