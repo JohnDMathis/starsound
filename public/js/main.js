@@ -16,7 +16,6 @@ require.config( {
 
 define( [ 'chart', 'lodash', 'socketio', 'jquery' ], function( Chart, _, io, $ ) {
 
-	var ctx = document.getElementById( "chart1" ).getContext( "2d" );
 
 	function configureSocket( host ) {
 		console.log( 'configureSocket', host );
@@ -27,14 +26,17 @@ define( [ 'chart', 'lodash', 'socketio', 'jquery' ], function( Chart, _, io, $ )
 		socket.on( 'stream.changed', function( msg ) {
 			console.log( 'stream changed', msg.id );
 			var labels = _.map( msg.stream, function( s, i ) {
-				return ( i + 1 ).toString();
+				// return ( i + 1 ).toString();
+				return "";
 			} );
 			console.log( 'labels:', labels.length, 'data:', msg.stream.length );
 
 			data.labels = labels;
 			data.datasets[ 0 ].data = msg.stream;
-			chart.destroy();
-			chart = new Chart( ctx ).Line( data, { pointDot: false, scaleShowVerticalLines: false, scaleShowHorizontalLines: false, dataSetFill: false } );
+			if ( chart ) {
+				chart.destroy();
+			}
+			chart = new Chart( ctx ).Line( data, chartOptions );
 		} );
 		socket.on( 'hey.there', function( msg ) {
 			console.log( 'hey there', msg );
@@ -58,13 +60,31 @@ define( [ 'chart', 'lodash', 'socketio', 'jquery' ], function( Chart, _, io, $ )
 			}
 		]
 	};
-	Chart.defaults.global.responsive = false;
+	// Chart.defaults.global.responsive = true;
+	// Charts.defaults.global.maintainAspectRatio = true;
+
+	var ctx = document.getElementById( "chart1" ).getContext( "2d" );
+	var chart;
+
 	Chart.defaults.global.animation = false;
 	Chart.defaults.global.animationSteps = 10;
 	Chart.defaults.global.showTooltips = false;
+	Chart.defaults.global.scaleShowLabels = false;
+	Chart.defaults.global.scaleLabel = "<%= value%>";
 
-	var chart;
-	chart = new Chart( ctx ).Line( data, { pointDot: false, scaleShowVerticalLines: false, scaleShowHorizontalLines: false, dataSetFill: false } );
+
+	chartOptions = {
+		pointDot: false,
+		scaleShowVerticalLines: false,
+		scaleShowHorizontalLines: false,
+		dataSetFill: false,
+		// scaleOverride: true,
+		// scaleSteps: 100,
+		// scaleStepWidth: 100000,
+		// scaleLineWidth: 0.5
+	};
+
+	chart = new Chart( ctx ).Line( data, chartOptions );
 
 
 } );
