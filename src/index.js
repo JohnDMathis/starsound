@@ -47,7 +47,6 @@ commands.subscribe( "analog.changed.*", function( percentage ) {
 	setStretch( stretchVals[ i ] );
 } );
 
-
 _.each( config.dataStreamMap, function( item ) {
 	console.log( 'import and add dataStream', item );
 	var stream = importer.import( "./data/" + item );
@@ -94,16 +93,19 @@ function expand() {
 	customTransformValues.stretch += 1;
 	console.log( 'expand', customTransformValues.stretch );
 	player.useTransformer( 'custom' );
+	host.socket.notify( "stretch.changed", { value: customTransformValues.stretch } );
 }
 
 function contract() {
 	customTransformValues.stretch -= 1;
 	player.useTransformer( 'custom' );
+	host.socket.notify( "stretch.changed", { value: customTransformValues.stretch } );
 }
 
 function setStretch( newStretch ) {
 	customTransformValues.stretch = newStretch;
 	player.useTransformer( 'custom' );
+	host.socket.notify( "stretch.changed", { value: newStretch } );
 }
 
 function magnify() {
