@@ -85,7 +85,7 @@ function currentStream( streamId ) {
 	if ( streamId && _streams[ streamId ] ) {
 		// check for a transformer matching streamId
 		// if present, apply it
-		console.log( "setting stream to", streamId, transformers[ streamId ] );
+		console.log( "setting stream to", streamId );
 		var strm;
 		if ( transformers[ streamId ] ) {
 			console.log( "applying transformer", streamId );

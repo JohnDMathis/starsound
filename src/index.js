@@ -54,7 +54,11 @@ _.each( config.levelAdjustments, function( level, key ) {
 function subscribe() {
 	commands.subscribe( "action", function( actionNum ) {
 		console.log( "got action", actionNum );
-		playSource( actionNum );
+		if ( actionNum === 6 ) {
+			adjustVolume();
+		} else {
+			playSource( actionNum );
+		}
 	} );
 
 	commands.subscribe( "analog.changed.*", function( percentage ) {
@@ -81,6 +85,18 @@ function playSource( source ) {
 	} else {
 		console.log( 'not found', source );
 	}
+}
+
+var currentLevel = 0;
+var multiplyValues = [ 1, 1.5, 2, 2.5, 3, 3.5 ];
+function adjustVolume() {
+	currentLevel++;
+	if ( currentLevel === multiplyValues.length ) {
+		currentLevel = 0;
+	}
+	customTransformValues.multiply = multiplyValues[ currentLevel ];
+	console.log( 'Adjust Volume to [%s]', customTransformValues.multiply );
+	player.useTransformer( 'custom' );
 }
 
 function transform( id ) {
