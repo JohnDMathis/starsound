@@ -36,17 +36,6 @@ host.on( "socket.client.identified", function( data ) {
 	player.startNofication( host.socket );
 } );
 
-commands.subscribe( "action", function( actionNum ) {
-	console.log( "got action", actionNum );
-	playSource( actionNum );
-} );
-
-commands.subscribe( "analog.changed.*", function( percentage ) {
-	var stretchVals = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ];
-	var i = Math.round( percentage / stretchVals.length - 1 );
-	setStretch( stretchVals[ i ] );
-} );
-
 _.each( config.dataStreamMap, function( item ) {
 	console.log( 'import and add dataStream', item );
 	var stream = importer.import( "./data/" + item );
@@ -61,6 +50,19 @@ _.each( config.levelAdjustments, function( level, key ) {
 			.result();
 	} );
 } );
+
+function subscribe() {
+	commands.subscribe( "action", function( actionNum ) {
+		console.log( "got action", actionNum );
+		playSource( actionNum );
+	} );
+
+	commands.subscribe( "analog.changed.*", function( percentage ) {
+		var stretchVals = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ];
+		var i = Math.round( percentage / stretchVals.length - 1 );
+		setStretch( stretchVals[ i ] );
+	} );
+}
 
 function playSource( source ) {
 
@@ -185,3 +187,7 @@ if ( KeyReader ) {
 		' ': dump
 	} );
 }
+
+setTimeout( function() {
+	subscribe();
+}, 2000 );

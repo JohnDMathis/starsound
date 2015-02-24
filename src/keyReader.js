@@ -4,11 +4,8 @@ var config;
 
 module.exports = function( _config ) {
 	config = _config;
-
 	keypress( process.stdin );
-
 	process.stdin.on( 'keypress', function( ch, key ) {
-
 		if ( key && key.ctrl && key.name == 'c' ) {
 			process.exit();
 			return;
