@@ -27,12 +27,7 @@ host.init( {
 	websocket: false
 } );
 
-host.on( "socket.client.closed", function( data ) {
-	console.log( "got socket.client.closed for id", data.id );
-} );
-
 host.on( "socket.client.identified", function( data ) {
-	console.log( "client identified", data.id );
 	player.startNofication( host.socket );
 } );
 
@@ -53,7 +48,6 @@ _.each( config.levelAdjustments, function( level, key ) {
 
 function subscribe() {
 	commands.subscribe( "action", function( actionNum ) {
-		console.log( "got action", actionNum );
 		if ( actionNum === 6 ) {
 			adjustVolume();
 		} else {
@@ -69,7 +63,6 @@ function subscribe() {
 }
 
 function playSource( source ) {
-
 	var sourceName = config.dataStreamMap[ source.toString() ];
 
 	console.log( 'selected', sourceName );
@@ -148,6 +141,10 @@ function truncate() {
 	customTransformValues.truncateValueSelected = i;
 	player.useTransformer( 'custom' );
 }
+function stop() {
+	console.log( 'Stop' );
+	player.stop();
+}
 function dump() {
 	console.log( 'Playing [ %s ]', player.getStreamName() );
 	var transformerName = player.getTransformerName();
@@ -179,30 +176,45 @@ player.addTransformer( 'custom', function( stream ) {
 } );
 
 
+var keyMap = {
+	'1': playSource,
+	'2': playSource,
+	'3': playSource,
+	'4': playSource,
+	'5': playSource,
+	'6': playSource,
+	'7': playSource,
+	'8': playSource,
+	'9': playSource,
+	'a': transform,
+	'b': transform,
+	'c': transform,
+	'd': transform,
+	't': truncate,
+	'backspace': clearTransform,
+	'`': clearTransform,
+	'up': magnify,
+	'down': demagnify,
+	'left': contract,
+	'right': expand,
+	'-': contract,
+	'=': expand,
+	'.': stop,
+	' ': dump
+};
+
 if ( KeyReader ) {
-	KeyReader( {
-		1: playSource,
-		2: playSource,
-		3: playSource,
-		4: playSource,
-		5: playSource,
-		6: playSource,
-		7: playSource,
-		8: playSource,
-		9: playSource,
-		a: transform,
-		b: transform,
-		c: transform,
-		d: transform,
-		t: truncate,
-		'backspace': clearTransform,
-		'up': magnify,
-		'down': demagnify,
-		'left': contract,
-		'right': expand,
-		' ': dump
-	} );
+	KeyReader( keyMap );
 }
+
+function handleWebKeypress( data ) {
+	if ( data && data.key && keyMap[ data.key ] ) {
+		keyMap[ data.key ]( data.key );
+	}
+}
+
+host.socket.on( "keypress", handleWebKeypress );
+
 
 setTimeout( function() {
 	subscribe();

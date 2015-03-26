@@ -1,3 +1,4 @@
+
 require.config( {
 	baseUrl: "../lib",
 	shim: {
@@ -84,7 +85,7 @@ define( [ 'chart', 'lodash', 'socketio', 'jquery' ], function( Chart, _, io, $ )
 	function configureSocket( host ) {
 		var title = $( "h2" );
 		console.log( 'configureSocket', host );
-		var socket = io.connect( "http://" + host.ipAddress + ":8810" );
+		var socket = window.socket = io.connect( "http://" + host.ipAddress + ":8810" );
 		socket.on( 'connect', function() {
 			console.log( 'connected!' );
 		} );
@@ -98,6 +99,10 @@ define( [ 'chart', 'lodash', 'socketio', 'jquery' ], function( Chart, _, io, $ )
 			} );
 			drawChart( labels, msg.stream );
 		} );
+		socket.on( 'stream.stopped', function() {
+			title.html( '' );
+			drawChart( [], [] );
+		} );
 		socket.on( 'stretch.changed', function( msg ) {
 			console.log( 'stretch value:', msg.value );
 			// truncate stream by the stretch amount
@@ -109,6 +114,7 @@ define( [ 'chart', 'lodash', 'socketio', 'jquery' ], function( Chart, _, io, $ )
 			} );
 			drawChart( labels, shortStream );
 		} );
+
 	}
 
 	$.get( '/api/app/host', configureSocket );
@@ -116,6 +122,10 @@ define( [ 'chart', 'lodash', 'socketio', 'jquery' ], function( Chart, _, io, $ )
 
 	var ctx = document.getElementById( "chart1" ).getContext( "2d" );
 
+	$( "body" ).keypress( function( data ) {
+		console.log( data.charCode, String.fromCharCode( data.charCode ) );
+		socket.emit( "keypress", { key: String.fromCharCode( data.charCode ) } );
+	} );
 
 
 } );

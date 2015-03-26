@@ -88,7 +88,6 @@ function currentStream( streamId ) {
 		console.log( "setting stream to", streamId );
 		var strm;
 		if ( transformers[ streamId ] ) {
-			console.log( "applying transformer", streamId );
 			var t = getTransformer( streamId );
 			console.log( t );
 			strm = t( _streams[ streamId ] );
@@ -97,14 +96,12 @@ function currentStream( streamId ) {
 		}
 
 		if ( currentTransformer ) {
-			console.log( 'applying currentTransformer' );
 			stream = currentTransformer( strm );
 		} else {
 			stream = strm;
 		}
 		streamName = streamId;
 		if ( socket ) {
-			console.log( 'notifying' );
 			socket.notify( "stream.changed", {
 				id: streamId,
 				stream: stream,
@@ -158,7 +155,7 @@ function stop() {
 		baudio.end();
 		baudio = null;
 		publicApi.isPlaying = false;
-
+		socket.notify( "stream.stopped" );
 	}
 }
 
